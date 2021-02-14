@@ -4,5 +4,5 @@
 # PyCharm.
 .idea
 
-# External data sources.
-/data
+# Configuration files.
+/config.py
