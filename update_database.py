@@ -17,12 +17,19 @@ vaccinations_path = 'data/vaccinations.csv'
 
 client = bigquery.Client()
 
-table_id = "covid-19-dashboard-304803.covid19_data.your_table_name"
-
+# Create BigQuery table if it does not exists.
+table_id = "covid-19-dashboard-304803.covid19_data.cases_and_vaccinations"
 schema = [
-    bigquery.SchemaField('full_name', 'STRING', mode='REQUIRED'),
-    bigquery.SchemaField('age', 'INTEGER', mode='REQUIRED'),
+    bigquery.SchemaField('country', 'STRING', mode='REQUIRED'),
+    bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
+    bigquery.SchemaField('cases', 'INTEGER'),
+    bigquery.SchemaField('deaths', 'INTEGER'),
+    bigquery.SchemaField('recovered', 'INTEGER'),
+    bigquery.SchemaField('vaccination_doses', 'INTEGER'),
+    bigquery.SchemaField('vaccination_people', 'INTEGER'),
+    bigquery.SchemaField('vaccination_people_fully', 'INTEGER'),
 ]
-
 table = bigquery.Table(table_id, schema=schema)
 table = client.create_table(table, exists_ok=True)
+
+#
