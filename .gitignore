@@ -1,0 +1,8 @@
+# Jupyter.
+.ipynb_checkpoints
+
+# PyCharm.
+.idea
+
+# External data sources.
+/data
