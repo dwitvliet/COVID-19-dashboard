@@ -104,17 +104,13 @@ df[integer_colums] = df[integer_colums].astype(int)
 df['cases_per_person'] = df['cases_total'] / df['population']
 df['deaths_per_person'] = df['deaths_total'] / df['population']
 df['tests_per_person'] = df['tests_total'] / df['population']
-df['new_cases_per_person'] = df['cases_new'] / df['population']
-df['new_deaths_per_person'] = df['deaths_new'] / df['population']
-df['new_tests_per_person'] = df['tests_new'] / df['population']
-df['deaths_per_case'] = (df['deaths_total'] / df['cases_total']).replace(np.inf, 0)
-df['cases_per_test'] = (df['cases_total'] / df['tests_total']).replace(np.inf, 0)
-df = df.drop(['cases_recovered', 'cases_critical', 'cases_active'], axis=1)
+df['new_cases_per_mil'] = df['cases_new'] / df['population'] * 1000000
+df['new_deaths_per_mil'] = df['deaths_new'] / df['population'] * 1000000
+df['new_tests_per_mil'] = df['tests_new'] / df['population'] * 1000000
+df['deaths_per_case_pct'] = (df['deaths_total'] / df['cases_total']).replace(np.inf, 0) * 100
+df['cases_per_test_pct'] = (df['cases_total'] / df['tests_total']).replace(np.inf, 0) * 100
 
-
-# Convert dataframe to long format.
-df = df.melt(id_vars=['country', 'date'], var_name='metric')
-
+df = df.drop(['cases_recovered', 'cases_active'], axis=1)
 
 # Create BigQuery table if it does not exists.
 client = bigquery.Client()
@@ -122,8 +118,22 @@ table_id = 'covid-19-dashboard-304803.covid19_data.cases'
 schema = [
     bigquery.SchemaField('country', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
-    bigquery.SchemaField('metric', 'STRING', mode='REQUIRED'),
-    bigquery.SchemaField('value', 'FLOAT'),
+    bigquery.SchemaField('population', 'INTEGER', mode='REQUIRED'),
+    bigquery.SchemaField('cases_total', 'INTEGER'),
+    bigquery.SchemaField('cases_new', 'INTEGER'),
+    bigquery.SchemaField('cases_critical', 'INTEGER'),
+    bigquery.SchemaField('deaths_total', 'INTEGER'),
+    bigquery.SchemaField('deaths_new', 'INTEGER'),
+    bigquery.SchemaField('tests_total', 'INTEGER'),
+    bigquery.SchemaField('tests_new', 'INTEGER'),
+    bigquery.SchemaField('cases_per_person', 'FLOAT'),
+    bigquery.SchemaField('deaths_per_person', 'FLOAT'),
+    bigquery.SchemaField('tests_per_person', 'FLOAT'),
+    bigquery.SchemaField('new_cases_per_mil', 'FLOAT'),
+    bigquery.SchemaField('new_deaths_per_mil', 'FLOAT'),
+    bigquery.SchemaField('new_tests_per_mil', 'FLOAT'),
+    bigquery.SchemaField('deaths_per_case_pct', 'FLOAT'),
+    bigquery.SchemaField('cases_per_test_pct', 'FLOAT'),
 ]
 client.delete_table(table_id, not_found_ok=True)
 table = bigquery.Table(table_id, schema=schema)
