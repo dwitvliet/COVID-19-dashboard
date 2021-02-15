@@ -20,7 +20,7 @@ countries = requests.request(
 
 dates = pd.date_range('2020-03-21', datetime.datetime.now() - datetime.timedelta(1))
 df = pd.DataFrame(
-    index=pd.MultiIndex.from_tuples(itertools.product(countries, dates.strftime('%Y-%m-%d')), names=['country', 'day']),
+    index=pd.MultiIndex.from_tuples(itertools.product(countries, dates.strftime('%Y-%m-%d')), names=['country', 'date']),
     columns=[
         'population', 'cases_new', 'cases_active', 'cases_recovered',
         'cases_critical', 'cases_total', 'deaths_new', 'deaths_total',
@@ -33,7 +33,7 @@ for country in countries:
         'GET', 'https://covid-193.p.rapidapi.com/history', headers=headers, params={'country': country}
     ).json()['response']
     for record in sorted(records, key=lambda x: x['cases']['total']):  # write largest number last in cases where multiple records exist per day.
-        key = (record['country'], record['day'])
+        key = (record['country'], record['date'])
         if key not in df.index:
             continue
         df.loc[key, 'population'] = record['population'] or np.nan
@@ -50,7 +50,7 @@ for country in countries:
 
 
 # Fill blank values.
-df = df.reset_index().pivot(index='day', columns='country')
+df = df.reset_index().pivot(index='date', columns='country')
 df['population'] = df['population'].fillna(method='ffill').fillna(method='bfill')
 for column in ['cases_total', 'cases_recovered', 'deaths_total', 'tests_total']:
     df[column] = df[column].fillna(method='ffill').fillna(0)
@@ -64,8 +64,24 @@ tests_new = df['tests_total'] - df['tests_total'].shift(fill_value=0)
 tests_new.columns = pd.MultiIndex.from_product([['tests_new'], tests_new.columns])
 df = df.join(tests_new)
 
-# Return dataframe to long format.
+# Remove ships.
 df = df.unstack().unstack(0).reset_index()
+df = df.loc[~df['country'].isin(['Diamond-Princess', 'Diamond-Princess-', 'MS-Zaandam', 'MS-Zaandam-'])]
+
+# Add missing populations.
+df.loc[df['country'] == 'Cura&ccedil;ao', 'population'] = 164798
+df.loc[df['country'] == 'Guam', 'population'] = 170179
+df.loc[df['country'] == 'Puerto-Rico', 'population'] = 2828255
+df.loc[df['country'] == 'R&eacute;union', 'population'] = 899263
+df.loc[df['country'] == 'Tanzania', 'population'] = 61498437
+df.loc[df['country'] == 'US-Virgin-Islands', 'population'] = 104363
+
+integer_colums = [
+    'population', 'cases_new', 'cases_active', 'cases_recovered',
+    'cases_critical', 'cases_total', 'deaths_new', 'deaths_total',
+    'tests_total', 'tests_new'
+]
+df[integer_colums] = df[integer_colums].astype(int)
 
 
 # Create BigQuery table if it does not exists.
@@ -89,6 +105,3 @@ client.delete_table(table_id, not_found_ok=True)
 table = bigquery.Table(table_id, schema=schema)
 table.expires = None
 table = client.create_table(table)
-
-# Insert data into table.
-# client.insert_rows(table_id, )
