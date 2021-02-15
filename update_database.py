@@ -36,7 +36,7 @@ for country in countries:
         'GET', 'https://covid-193.p.rapidapi.com/history', headers=headers, params={'country': country}
     ).json()['response']
     for record in sorted(records, key=lambda x: x['cases']['total']):  # write largest number last in cases where multiple records exist per day.
-        key = (record['country'], record['date'])
+        key = (record['country'], record['day'])
         if key not in df.index:
             continue
         df.loc[key, 'population'] = record['population'] or np.nan
