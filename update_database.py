@@ -75,8 +75,8 @@ df = df.loc[~df['country'].isin([
 ])]
 df['country'] = df['country'].replace({
     'USA': 'United States', 'UK': 'United Kingdom', 'CAR': 'Central African Republic',
-    'UAE': 'United Arab Emirates', 'DRC': 'Democratic Republic of the Congo',
-    'S-Korea': 'South Korea'
+    'UAE': 'United Arab Emirates', 'S-Korea': 'South Korea',
+    'Congo': 'Republic of the Congo',  'DRC': 'Democratic Republic of the Congo',
 })
 
 # Add missing populations.
