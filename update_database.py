@@ -105,3 +105,6 @@ client.delete_table(table_id, not_found_ok=True)
 table = bigquery.Table(table_id, schema=schema)
 table.expires = None
 table = client.create_table(table)
+
+# Insert data into table.
+client.insert_rows_from_dataframe(table, df)
