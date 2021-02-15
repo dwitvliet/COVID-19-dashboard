@@ -70,10 +70,6 @@ tests_new = df['tests_total'] - df['tests_total'].shift(fill_value=0)
 tests_new.columns = pd.MultiIndex.from_product([['tests_new'], tests_new.columns])
 df = df.join(tests_new)
 
-# Smooth new cases, deaths, and tests.
-for column in ['cases_new', 'deaths_new', 'tests_new']:
-    df[column] = df[column].rolling(7, min_periods=1).mean()
-
 # Remove non-countries and abbreviations.
 df = df.unstack().unstack(0).reset_index()
 df = df.loc[~df['country'].isin([
