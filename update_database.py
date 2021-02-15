@@ -93,6 +93,18 @@ integer_colums = [
 ]
 df[integer_colums] = df[integer_colums].astype(int)
 
+# Calculate metrics.
+df['cases_per_person'] = df['cases_total'] / df['population']
+df['deaths_per_person'] = df['deaths_total'] / df['population']
+df['tests_per_person'] = df['tests_total'] / df['population']
+df['deaths_per_case'] = (df['deaths_total'] / df['cases_total']).fillna(0)
+df['cases_per_test'] = (df['cases_total'] / df['tests_total']).fillna(0)
+df['deaths_per_test'] = (df['deaths_total'] / df['tests_total']).fillna(0)
+
+
+# Convert dataframe to long format.
+df = df.melt(id_vars=['country', 'date'], var_name='metric')
+
 
 # Create BigQuery table if it does not exists.
 client = bigquery.Client()
@@ -100,16 +112,8 @@ table_id = 'covid-19-dashboard-304803.covid19_data.cases'
 schema = [
     bigquery.SchemaField('country', 'STRING', mode='REQUIRED'),
     bigquery.SchemaField('date', 'DATE', mode='REQUIRED'),
-    bigquery.SchemaField('population', 'INTEGER', mode='REQUIRED'),
-    bigquery.SchemaField('cases_total', 'INTEGER'),
-    bigquery.SchemaField('cases_new', 'INTEGER'),
-    bigquery.SchemaField('cases_active', 'INTEGER'),
-    bigquery.SchemaField('cases_recovered', 'INTEGER'),
-    bigquery.SchemaField('cases_critical', 'INTEGER'),
-    bigquery.SchemaField('deaths_total', 'INTEGER'),
-    bigquery.SchemaField('deaths_new', 'INTEGER'),
-    bigquery.SchemaField('tests_total', 'INTEGER'),
-    bigquery.SchemaField('tests_new', 'INTEGER'),
+    bigquery.SchemaField('metric', 'STRING', mode='REQUIRED'),
+    bigquery.SchemaField('value', 'FLOAT'),
 ]
 client.delete_table(table_id, not_found_ok=True)
 table = bigquery.Table(table_id, schema=schema)
