@@ -10,7 +10,7 @@ from google.cloud import bigquery
 from config import api_key
 
 
-# Fetch most recent data.
+# Get a list of countries to fetch for.
 headers = {
     'x-rapidapi-key': api_key, 'x-rapidapi-host': 'covid-193.p.rapidapi.com'
 }
@@ -18,6 +18,7 @@ countries = requests.request(
     'GET', 'https://covid-193.p.rapidapi.com/countries', headers=headers
 ).json()['response']
 
+# Init dataframe to store the data.
 dates = pd.date_range('2020-03-21', datetime.datetime.now() - datetime.timedelta(1))
 df = pd.DataFrame(
     index=pd.MultiIndex.from_tuples(itertools.product(countries, dates.strftime('%Y-%m-%d')), names=['country', 'date']),
@@ -27,6 +28,8 @@ df = pd.DataFrame(
         'tests_total'
     ],
 )
+
+# Fetch cases, deaths, and tests for each country.
 for country in countries:
     print(country)
     records = requests.request(
@@ -49,7 +52,7 @@ for country in countries:
     time.sleep(1)  # max 60 requests per minute
 
 
-# Fill blank values.
+# Fill missing values.
 df = df.reset_index().pivot(index='date', columns='country')
 df['population'] = df['population'].fillna(method='ffill').fillna(method='bfill')
 for column in ['cases_total', 'cases_recovered', 'deaths_total', 'tests_total']:
@@ -76,6 +79,7 @@ df.loc[df['country'] == 'R&eacute;union', 'population'] = 899263
 df.loc[df['country'] == 'Tanzania', 'population'] = 61498437
 df.loc[df['country'] == 'US-Virgin-Islands', 'population'] = 104363
 
+# Convert dataframe values to integers.
 integer_colums = [
     'population', 'cases_new', 'cases_active', 'cases_recovered',
     'cases_critical', 'cases_total', 'deaths_new', 'deaths_total',
