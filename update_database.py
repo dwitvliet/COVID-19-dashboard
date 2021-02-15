@@ -67,15 +67,21 @@ tests_new = df['tests_total'] - df['tests_total'].shift(fill_value=0)
 tests_new.columns = pd.MultiIndex.from_product([['tests_new'], tests_new.columns])
 df = df.join(tests_new)
 
-# Remove ships.
+# Remove non-countries and abbreviations.
 df = df.unstack().unstack(0).reset_index()
-df = df.loc[~df['country'].isin(['Diamond-Princess', 'Diamond-Princess-', 'MS-Zaandam', 'MS-Zaandam-'])]
+df = df.loc[~df['country'].isin([
+    'Diamond-Princess', 'Diamond-Princess-', 'MS-Zaandam', 'MS-Zaandam-',
+    'Cura&ccedil;ao', 'R&eacute;union'
+])]
+df['country'] = df['country'].replace({
+    'USA': 'United States', 'UK': 'United Kingdom', 'CAR': 'Central African Republic',
+    'UAE': 'United Arab Emirates', 'DRC': 'Democratic Republic of the Congo',
+    'S-Korea': 'South Korea'
+})
 
 # Add missing populations.
-df.loc[df['country'] == 'Cura&ccedil;ao', 'population'] = 164798
 df.loc[df['country'] == 'Guam', 'population'] = 170179
 df.loc[df['country'] == 'Puerto-Rico', 'population'] = 2828255
-df.loc[df['country'] == 'R&eacute;union', 'population'] = 899263
 df.loc[df['country'] == 'Tanzania', 'population'] = 61498437
 df.loc[df['country'] == 'US-Virgin-Islands', 'population'] = 104363
 
