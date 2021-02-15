@@ -3,6 +3,10 @@ SELECT
     `date`,
     SUM(cases_total) AS cases_total,
     SUM(cases_new) AS cases_new,
+    SUM(deaths_total) AS deaths_total,
+    SUM(deaths_new) AS deaths_new,
+    SUM(tests_total) AS tests_total,
+    SUM(tests_new) AS tests_new,
     CASE
         WHEN SUM(tests_total) = 0 THEN NULL
         ELSE SUM(deaths_total) / SUM(cases_total)
