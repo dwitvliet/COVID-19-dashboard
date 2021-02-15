@@ -45,17 +45,24 @@ for country in countries:
         df.loc[key, 'deaths_total'] = int(record['deaths']['total'] or '0')
         df.loc[key, 'tests_total'] = int(record['tests']['total'] or '0')
 
-    time.sleep(1)
+    time.sleep(1)  # max 60 requests per minute
 
+# Fill blank values.
+df = df.reset_index().pivot(index='day', columns='country')
+for column in ['population', 'cases_total', 'cases_recovered', 'deaths_total', 'tests_total']:
+    df[column] = df[column].fillna(method='ffill').fillna(0)
+for column in ['cases_active', 'cases_critical']:
+    df[column] = df[column].fillna(method='ffill', limit=5).fillna(0)
+for column in ['cases_new', 'deaths_new']:
+    df[column] = df[column].fillna(0)
 
+# Calculate new tests.
+tests_new = df['tests_total'] - df['tests_total'].shift(fill_value=0)
+tests_new.columns = pd.MultiIndex.from_product([['tests_new'], tests_new.columns])
+df = df.join(tests_new)
 
-
-
-#querystring = {'country":"usa","day":"2020-06-02"}
-
-
-
-
+# Return dataframe to long format.
+df = df.unstack().unstack(0).reset_index()
 
 
 # Create BigQuery table if it does not exists.
