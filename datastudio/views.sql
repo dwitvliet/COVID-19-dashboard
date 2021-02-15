@@ -13,4 +13,4 @@ SELECT
     END AS cases_per_test_pct,
 FROM `covid19_data.cases`
 GROUP BY `date`
-ORDER BY `date` DESC;
+ORDER BY `date` ASC;
