@@ -1,4 +1,4 @@
-CREATE VIEW covid19_data.cases_global AS
+CREATE OR REPLACE VIEW covid19_data.cases_global AS
 SELECT
     `date`,
     SUM(cases_total) AS cases_total,
