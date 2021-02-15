@@ -62,6 +62,9 @@ for column in ['cases_active', 'cases_critical']:
 for column in ['cases_new', 'deaths_new']:
     df[column] = df[column].fillna(0)
 
+# Fix incorrect values.
+df.loc[['2021-01-12', '2021-01-13'], ('tests_total', 'Bahrain')] /= 10
+
 # Calculate new tests.
 tests_new = df['tests_total'] - df['tests_total'].shift(fill_value=0)
 tests_new.columns = pd.MultiIndex.from_product([['tests_new'], tests_new.columns])
@@ -106,7 +109,7 @@ df['new_deaths_per_person'] = df['deaths_new'] / df['population']
 df['new_tests_per_person'] = df['tests_new'] / df['population']
 df['deaths_per_case'] = (df['deaths_total'] / df['cases_total']).replace(np.inf, 0)
 df['cases_per_test'] = (df['cases_total'] / df['tests_total']).replace(np.inf, 0)
-df = df.drop(['population', 'cases_recovered', 'cases_critical', 'cases_active'], axis=1)
+df = df.drop(['cases_recovered', 'cases_critical', 'cases_active'], axis=1)
 
 
 # Convert dataframe to long format.
