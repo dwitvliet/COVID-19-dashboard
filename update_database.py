@@ -67,6 +67,10 @@ tests_new = df['tests_total'] - df['tests_total'].shift(fill_value=0)
 tests_new.columns = pd.MultiIndex.from_product([['tests_new'], tests_new.columns])
 df = df.join(tests_new)
 
+# Smooth new cases, deaths, and tests.
+for column in ['cases_new', 'deaths_new', 'tests_new']:
+    df[column] = df[column].rolling(7, min_periods=1).mean()
+
 # Remove non-countries and abbreviations.
 df = df.unstack().unstack(0).reset_index()
 df = df.loc[~df['country'].isin([
@@ -97,9 +101,12 @@ df[integer_colums] = df[integer_colums].astype(int)
 df['cases_per_person'] = df['cases_total'] / df['population']
 df['deaths_per_person'] = df['deaths_total'] / df['population']
 df['tests_per_person'] = df['tests_total'] / df['population']
+df['new_cases_per_person'] = df['cases_new'] / df['population']
+df['new_deaths_per_person'] = df['deaths_new'] / df['population']
+df['new_tests_per_person'] = df['tests_new'] / df['population']
 df['deaths_per_case'] = (df['deaths_total'] / df['cases_total']).replace(np.inf, 0)
 df['cases_per_test'] = (df['cases_total'] / df['tests_total']).replace(np.inf, 0)
-df['deaths_per_test'] = (df['deaths_total'] / df['tests_total']).replace(np.inf, 0)
+df = df.drop(['population', 'cases_recovered', 'cases_critical', 'cases_active'], axis=1)
 
 
 # Convert dataframe to long format.
