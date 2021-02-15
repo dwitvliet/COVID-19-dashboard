@@ -97,9 +97,9 @@ df[integer_colums] = df[integer_colums].astype(int)
 df['cases_per_person'] = df['cases_total'] / df['population']
 df['deaths_per_person'] = df['deaths_total'] / df['population']
 df['tests_per_person'] = df['tests_total'] / df['population']
-df['deaths_per_case'] = (df['deaths_total'] / df['cases_total']).fillna(0)
-df['cases_per_test'] = (df['cases_total'] / df['tests_total']).fillna(0)
-df['deaths_per_test'] = (df['deaths_total'] / df['tests_total']).fillna(0)
+df['deaths_per_case'] = (df['deaths_total'] / df['cases_total']).replace(np.inf, 0)
+df['cases_per_test'] = (df['cases_total'] / df['tests_total']).replace(np.inf, 0)
+df['deaths_per_test'] = (df['deaths_total'] / df['tests_total']).replace(np.inf, 0)
 
 
 # Convert dataframe to long format.
