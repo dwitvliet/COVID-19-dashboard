@@ -17,7 +17,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def run():
     # Ensure request is authenticated.
-    request_token = request.args.get("who", "World")
+    request_token = request.args.get('token')
     if request_token != cloud_run_token:
         return
 
