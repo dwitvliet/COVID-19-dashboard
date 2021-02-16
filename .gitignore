@@ -3,6 +3,7 @@
 
 # PyCharm.
 .idea
+/__pycache__
 
 # Configuration files.
 /config.py
