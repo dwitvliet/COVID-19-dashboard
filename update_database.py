@@ -6,20 +6,11 @@ import requests
 import numpy as np
 import pandas as pd
 from google.cloud import bigquery
-from flask import Flask, request
 
-from config import rapid_api_key, cloud_run_token
-
-
-app = Flask(__name__)
+from config import rapid_api_key
 
 
-@app.route('/', methods=['GET'])
-def run():
-    # Ensure request is authenticated.
-    request_token = request.args.get('token')
-    if request_token != cloud_run_token:
-        return
+def main():
 
     # Get a list of countries to fetch for.
     headers = {
@@ -148,11 +139,3 @@ def run():
 
     # Insert data into table.
     client.insert_rows_from_dataframe(table, df)
-
-    return 'Completed'
-
-
-if __name__ == '__main__':
-    # Used when running locally only. When deploying to Cloud Run,
-    # a webserver process such as Gunicorn will serve the app.
-    app.run(host='localhost', port=8080, debug=True)
