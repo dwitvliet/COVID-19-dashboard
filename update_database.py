@@ -139,3 +139,7 @@ def main():
 
     # Insert data into table.
     client.insert_rows_from_dataframe(table, df)
+
+
+if __name__ == '__main__':
+    main()
