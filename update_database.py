@@ -1,7 +1,6 @@
 import time
 import datetime
 import itertools
-
 import requests
 import numpy as np
 import pandas as pd
@@ -114,7 +113,7 @@ def main():
     df = df.drop(['cases_recovered', 'cases_active'], axis=1)
 
     # Create BigQuery table if it does not exists.
-    client = bigquery.Client()
+    client = bigquery.Client(project='covid-19-dashboard-304803')
     table_id = 'covid-19-dashboard-304803.covid19_data.cases'
     schema = [
         bigquery.SchemaField('country', 'STRING', mode='REQUIRED'),
